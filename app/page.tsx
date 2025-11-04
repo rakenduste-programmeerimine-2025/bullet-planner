@@ -22,6 +22,24 @@ export default function Page() {
         <ArrowRight className="w-5 h-5" strokeWidth={2} />
       </Link>
       
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-12 text-sm text-gray-600">
+        <div className="flex flex-col items-center gap-2">
+          <BookOpen className="w-5 h-5 text-black" strokeWidth={1.5} />
+          <span>Notes</span>
+        </div>
+        <div className="flex flex-col items-center gap-2">
+          <ArrowRight className="w-5 h-5 text-black" strokeWidth={1.5} />
+          <span>Tasks</span>
+        </div>
+        <div className="flex flex-col items-center gap-2">
+          <BookOpen className="w-5 h-5 text-black" strokeWidth={1.5} />
+          <span>Planner</span>
+        </div>
+        <div className="flex flex-col items-center gap-2">
+          <ArrowRight className="w-5 h-5 text-black" strokeWidth={1.5} />
+          <span>Goals</span>
+        </div>
+      </div>     
       </div>
     </div>
   );
