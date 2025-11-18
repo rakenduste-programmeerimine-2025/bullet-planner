@@ -1,12 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import {
-  Calendar,
-  ListChecks,
-  Image as ImageIcon,
-  Settings,
-} from "lucide-react";
+import { Calendar, ListChecks, Image as ImageIcon, Settings } from "lucide-react";
 
 export default function DashboardSidebar() {
   return (
@@ -15,40 +10,17 @@ export default function DashboardSidebar() {
         <h3 className="font-semibold mb-2 flex items-center gap-2">
           <Calendar className="w-4 h-4" strokeWidth={2} /> Calendar
         </h3>
-
         <ul className="space-y-2 text-sm">
-          <li>
-            <Link href="/daily-tasks" className="hover:text-gray-600 block">
-              Daily Tasks
-            </Link>
-          </li>
-          <li>
-            <Link href="/notes" className="hover:text-gray-600 block">
-              Notes
-            </Link>
-          </li>
-          <li>
-            <Link href="/events" className="hover:text-gray-600 block">
-              Events
-            </Link>
-          </li>
-          <li>
-            <Link
-              href="/planner"
-              className="hover:text-gray-600 block font-semibold"
-            >
-              📖 My Planner
-            </Link>
-          </li>
+          <li><Link href="/daily-tasks" className="hover:text-gray-600 block">Daily Tasks</Link></li>
+          <li><Link href="/notes" className="hover:text-gray-600 block">Notes</Link></li>
+          <li><Link href="/events" className="hover:text-gray-600 block">Events</Link></li>
+          <li><Link href="/planner" className="hover:text-gray-600 block font-semibold">📖 My Planner</Link></li>
         </ul>
 
         <h3 className="font-semibold mt-6 mb-2">Settings</h3>
         <ul className="space-y-2 text-sm">
           <li>
-            <Link
-              href="/profile"
-              className="hover:text-gray-600 flex items-center gap-2"
-            >
+            <Link href="/profile" className="hover:text-gray-600 flex items-center gap-2">
               <Settings className="w-4 h-4" strokeWidth={2} /> Account Settings
             </Link>
           </li>
