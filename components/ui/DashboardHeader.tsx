@@ -1,16 +1,20 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { BookOpen, LogOut } from "lucide-react";
 import { supabase } from "@/lib/supabase/supabaseClient";
-import { useRouter } from "next/navigation";
 
-export default function DashboardHeader({ userEmail }: { userEmail: string }) {
+interface DashboardHeaderProps {
+  userEmail: string | null;
+}
+
+export default function DashboardHeader({ userEmail }: DashboardHeaderProps) {
   const router = useRouter();
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
-    router.push("/");
+    router.push("/"); // tagasi home peale logout
   };
 
   return (
@@ -22,17 +26,18 @@ export default function DashboardHeader({ userEmail }: { userEmail: string }) {
         <span>Bullet Planner</span>
       </Link>
 
-      <div className="flex items-center gap-4">
-        <span className="text-sm text-gray-600">{userEmail}</span>
-
-        <button
-          onClick={handleLogout}
-          className="flex items-center gap-2 text-gray-600 hover:text-black transition-colors text-sm"
-        >
-          <LogOut className="w-4 h-4" strokeWidth={2} />
-          Logout
-        </button>
-      </div>
+      {userEmail && (
+        <div className="flex items-center gap-4">
+          <span className="text-sm text-gray-600">{userEmail}</span>
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-2 text-gray-600 hover:text-black transition-colors text-sm"
+          >
+            <LogOut className="w-4 h-4" strokeWidth={2} />
+            Logout
+          </button>
+        </div>
+      )}
     </header>
   );
 }
