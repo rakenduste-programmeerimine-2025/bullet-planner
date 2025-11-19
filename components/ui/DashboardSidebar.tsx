@@ -11,6 +11,13 @@ export default function DashboardSidebar() {
           <Calendar className="w-4 h-4" strokeWidth={2} /> Calendar
         </h3>
         <ul className="space-y-2 text-sm">
+          <li>
+            <Link href="/calendar" className="hover:text-gray-600 block">
+              Calendar View
+            </Link>
+          </li>
+          </ul>
+        <ul className="space-y-2 text-sm">
           <li><Link href="/daily-tasks" className="hover:text-gray-600 block">Daily Tasks</Link></li>
           <li><Link href="/notes" className="hover:text-gray-600 block">Notes</Link></li>
           <li><Link href="/events" className="hover:text-gray-600 block">Events</Link></li>
