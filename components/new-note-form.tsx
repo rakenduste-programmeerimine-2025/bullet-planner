@@ -30,7 +30,7 @@ export default function NewNoteForm({ date: initialDate }: { date: string }) {
         className="mb-6 flex items-center gap-2 bg-black text-white px-4 py-2 rounded-sm font-semibold hover:bg-gray-900 transition-colors"
       >
         <Plus className="w-5 h-5" strokeWidth={2} />
-        Add Event
+        Add Note
       </button>
     );
 
@@ -60,7 +60,7 @@ export default function NewNoteForm({ date: initialDate }: { date: string }) {
           type="submit"
           className="flex-1 bg-black text-white py-2 rounded-sm font-semibold hover:bg-gray-900 transition-colors"
         >
-          Add Task
+          Add Note
         </button>
         <button
           type="button"
