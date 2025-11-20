@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import TaskDatePicker from './ui/tasks/TaskDatePicker';
+import NewNoteForm from './new-note-form';
 
 export default function NotePage({ selectedDate }: { selectedDate: string }) {
   const router = useRouter();
@@ -17,6 +18,7 @@ export default function NotePage({ selectedDate }: { selectedDate: string }) {
           selectedDate={selectedDate}
           onChange={handleDateChange}
         />
+        <NewNoteForm date={selectedDate}/>
       </div>
     </main>
   );
