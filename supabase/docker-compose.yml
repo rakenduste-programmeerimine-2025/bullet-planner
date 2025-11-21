@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  db:
+    image: public.ecr.aws/supabase/postgres:17.6.1.029
+    container_name: supabase_db
+    ports:
+      - "54322:5432"
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    volumes:
+      - ./supabase-data:/var/lib/postgresql/data
+
+  studio:
+    image: public.ecr.aws/supabase/studio:2025.10.27-sha-85b84e0
+    container_name: supabase_studio
+    ports:
+      - "54323:3000"
+
+  kong:
+    image: public.ecr.aws/supabase/kong:2.8.1
+    container_name: supabase_kong
+    ports:
+      - "54321:8000"
+
+  mail:
+    image: public.ecr.aws/supabase/mailpit:v1.22.3
+    container_name: supabase_mail
+    ports:
+      - "54324:8025"
+
+  gotrue:
+    image: public.ecr.aws/supabase/gotrue:v2.180.0
+    container_name: supabase_gotrue
+
+  postgrest:
+    image: public.ecr.aws/supabase/postgrest:v13.0.7
+    container_name: supabase_postgrest
+
+  realtime:
+    image: public.ecr.aws/supabase/realtime:v2.57.3
+    container_name: supabase_realtime
+
+  storage:
+    image: public.ecr.aws/supabase/storage-api:v1.28.2
+    container_name: supabase_storage
