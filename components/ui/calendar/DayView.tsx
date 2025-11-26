@@ -9,8 +9,8 @@ interface CalendarEntryType {
   title: string;
   content?: string;
   date: string;
-  startTime: string;
-  endTime: string;
+  startTime: string; // HH:MM 24h
+  endTime: string;   // HH:MM 24h
 }
 
 interface DayViewProps {
@@ -19,58 +19,53 @@ interface DayViewProps {
 
 export default function DayView({ selectedDate }: DayViewProps) {
   const [entries, setEntries] = useState<CalendarEntryType[]>([]);
-
   const [formPosition, setFormPosition] = useState<number | null>(null);
   const [newTitle, setNewTitle] = useState("");
   const [newContent, setNewContent] = useState("");
   const [newStartTime, setNewStartTime] = useState("06:00");
   const [newEndTime, setNewEndTime] = useState("07:00");
 
-  // ---- LOAD FROM SUPABASE ----
+  // ---- Load entries from Supabase ----
   useEffect(() => {
     const fetchEntries = async () => {
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from("calendar_entries")
         .select("*")
         .eq("date", selectedDate)
         .order("start_time", { ascending: true });
 
-      if (!data || error) {
-        setEntries([]);
-        return;
+      if (data) {
+        // Tagame, et kõik ajad oleks HH:MM 24h formaadis
+        setEntries(
+          data.map((d) => ({
+            id: d.id.toString(),
+            title: d.title,
+            content: d.content,
+            date: d.date,
+            startTime: d.start_time.slice(0, 5),
+            endTime: d.end_time.slice(0, 5),
+          }))
+        );
       }
-
-      setEntries(
-        (data ?? []).map((d) => ({
-          id: d.id.toString(),
-          title: d.title,
-          content: d.content,
-          date: d.date,
-          startTime: d.start_time,
-          endTime: d.end_time,
-        }))
-      );
     };
 
     fetchEntries();
   }, [selectedDate]);
 
-  // ---- SAVE NEW ENTRY ----
+  // ---- Save new entry ----
   const saveEntry = async (entry: CalendarEntryType) => {
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from("calendar_entries")
-      .insert([
-        {
-          title: entry.title,
-          content: entry.content,
-          date: entry.date,
-          start_time: entry.startTime,
-          end_time: entry.endTime,
-        },
-      ])
+      .insert([{
+        title: entry.title,
+        content: entry.content,
+        date: entry.date,
+        start_time: entry.startTime,
+        end_time: entry.endTime,
+      }])
       .select("*");
 
-    if (!data || error) return null;
+    if (!data || !data[0]) return null;
 
     return {
       id: data[0].id.toString(),
@@ -105,17 +100,17 @@ export default function DayView({ selectedDate }: DayViewProps) {
     setNewEndTime("07:00");
   };
 
-  // ---- DELETE ----
   const handleDelete = async (id: string) => {
     setEntries(entries.filter((e) => e.id !== id));
     await supabase.from("calendar_entries").delete().eq("id", id);
   };
 
-  const hours = Array.from({ length: 19 }, (_, i) => i + 6);
+  // ---- Päeva tunnid 0–23 ----
+  const hours = Array.from({ length: 24 }, (_, i) => i);
 
   const getTopPosition = (time: string) => {
     const [h, m] = time.split(":").map(Number);
-    return (h - 6 + m / 60) * 50;
+    return (h + m / 60) * 50; // 50px per hour
   };
 
   const handleHourClick = (h: number) => {
@@ -127,9 +122,8 @@ export default function DayView({ selectedDate }: DayViewProps) {
 
   return (
     <div className="relative max-w-4xl mx-auto p-4 border">
-
       <h2 className="text-2xl font-bold mb-4">
-        {new Date(selectedDate).toLocaleDateString("en-US", {
+        {new Date(selectedDate).toLocaleDateString("en-GB", {
           weekday: "long",
           month: "long",
           day: "numeric",
@@ -137,40 +131,37 @@ export default function DayView({ selectedDate }: DayViewProps) {
       </h2>
 
       <div className="relative border-t border-gray-300" style={{ height: hours.length * 50 }}>
-
         {/* TIME ROWS */}
         {hours.map((h) => (
           <div
             key={h}
             className="absolute left-0 right-0 flex items-center cursor-pointer"
-            style={{ top: (h - 6) * 50 }}
+            style={{ top: h * 50 }}
             onClick={() => handleHourClick(h)}
           >
-            <span className="w-12 text-xs font-semibold">
-              {h.toString().padStart(2, "0")}:00
-            </span>
+            <span className="w-12 text-xs font-semibold">{h.toString().padStart(2, "0")}:00</span>
             <div className="flex-1 ml-2 border-t border-gray-300"></div>
           </div>
         ))}
 
-        {/* EVENTS */}
+        {/* REAL EVENTS */}
         {entries.map((entry) => {
           const top = getTopPosition(entry.startTime) + 2;
           const bottom = getTopPosition(entry.endTime);
-          const minHeight = Math.max(bottom - top, 28);
+          const height = bottom - top;
 
           return (
             <div
               key={entry.id}
-              style={{ top, minHeight }}
+              style={{ top, height }}
               className="absolute left-12 right-2"
             >
               <CalendarEntry
                 id={entry.id}
                 title={entry.title}
                 content={entry.content}
-                startTime={entry.startTime}
-                endTime={entry.endTime}
+                startTime={entry.startTime} // 24h formaat
+                endTime={entry.endTime}     // 24h formaat
                 onDelete={handleDelete}
               />
             </div>
