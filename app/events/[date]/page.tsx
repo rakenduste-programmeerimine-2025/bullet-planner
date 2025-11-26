@@ -11,6 +11,14 @@ export default async function Page({ params }: { params: { date: string } }) {
     .select()
     .eq('date', date);
 
+  const formatTime = (time: string) => {
+  if (/^\d{2}:\d{2}:\d{2}$/.test(time)) {
+    return time.slice(0, 5); // "HH:MM"
+  }
+  return time; // fallback
+  };
+
+
   return (
     <div className="min-h-screen flex flex-col bg-white text-black">
       <div className="flex flex-1">
@@ -37,6 +45,9 @@ export default async function Page({ params }: { params: { date: string } }) {
                     </h3>
                     <p className="text-gray-600 text-sm whitespace-pre-wrap">
                       Location: {event.location}
+                    </p>
+                    <p className="text-gray-600 text-sm whitespace-pre-wrap">
+                      Time: {formatTime(event.time)}
                     </p>
                   </div>
                 ))
