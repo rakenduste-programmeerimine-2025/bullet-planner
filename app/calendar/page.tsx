@@ -33,8 +33,7 @@ export default function CalendarPage() {
       setLoading(false);
     };
     fetchSession();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // tühja massiiviga, router stabiilne
+  }, []);
 
   if (loading) return <div>Loading...</div>;
 
@@ -56,22 +55,32 @@ export default function CalendarPage() {
 
   const formatTitle = () => {
     if (viewMode === "day") {
-      return selectedDate.toLocaleDateString("en-US", {
+      return selectedDate.toLocaleDateString("en-GB", {
         weekday: "long",
-        month: "long",
         day: "numeric",
+        month: "long",
         year: "numeric",
       });
     }
 
     if (viewMode === "week") {
       const start = new Date(selectedDate);
-      const end = new Date(selectedDate);
-      end.setDate(end.getDate() + 6);
-      return `Week of ${start.toLocaleDateString()} - ${end.toLocaleDateString()}`;
+      const dayOfWeek = start.getDay();
+      const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek; // esmaspäev
+      start.setDate(start.getDate() + diff);
+
+      const end = new Date(start);
+      end.setDate(start.getDate() + 6);
+
+      const formatDDMM = (d: Date) =>
+        `${d.getDate().toString().padStart(2, "0")}.${(d.getMonth() + 1)
+          .toString()
+          .padStart(2, "0")}`;
+
+      return `Week of ${formatDDMM(start)} - ${formatDDMM(end)}`;
     }
 
-    return selectedDate.toLocaleDateString("en-US", {
+    return selectedDate.toLocaleDateString("en-GB", {
       month: "long",
       year: "numeric",
     });
@@ -93,7 +102,9 @@ export default function CalendarPage() {
                   key={mode}
                   onClick={() => setViewMode(mode as ViewMode)}
                   className={`px-3 py-1 border rounded ${
-                    viewMode === mode ? "bg-black text-white" : "bg-white text-black"
+                    viewMode === mode
+                      ? "bg-black text-white"
+                      : "bg-white text-black"
                   }`}
                 >
                   {mode.charAt(0).toUpperCase() + mode.slice(1)}
@@ -102,20 +113,30 @@ export default function CalendarPage() {
             </div>
 
             <div className="flex items-center gap-4">
-              <button onClick={handlePrev} className="px-3 py-1 border rounded bg-white">
+              <button
+                onClick={handlePrev}
+                className="px-3 py-1 border rounded bg-white"
+              >
                 ←
               </button>
 
-              <h2 className="text-2xl font-bold text-center min-w-[220px]">{formatTitle()}</h2>
+              <h2 className="text-2xl font-bold text-center min-w-[220px]">
+                {formatTitle()}
+              </h2>
 
-              <button onClick={handleNext} className="px-3 py-1 border rounded bg-white">
+              <button
+                onClick={handleNext}
+                className="px-3 py-1 border rounded bg-white"
+              >
                 →
               </button>
             </div>
           </div>
 
           {/* Active view */}
-          {viewMode === "day" && <DayView selectedDate={selectedDate} />}
+          {viewMode === "day" && (
+            <DayView selectedDate={selectedDate.toISOString().split("T")[0]} />
+          )}
           {viewMode === "week" && <WeekView selectedDate={selectedDate} />}
           {viewMode === "month" && <MonthView selectedDate={selectedDate} />}
         </main>
