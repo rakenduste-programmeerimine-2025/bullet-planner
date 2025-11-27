@@ -1,0 +1,39 @@
+create table "public"."events" (
+    "id" bigint generated always as identity not null,
+    "title" text not null,
+	"location" text not null,
+    "date" date not null,
+	"time" time not null,
+    "created_at" timestamp with time zone default now()
+    );
+
+
+
+  create table "public"."notes" (
+    "id" bigint generated always as identity not null,
+    "title" text not null,
+    "note" text not null,
+    "date" date not null,
+    "created_at" timestamp with time zone default now()
+    );
+
+
+
+  create table "public"."planners" (
+    "id" bigint generated always as identity not null,
+    "title" text not null,
+    "b_color" text not null default 'white'::text,
+    "a_color" text not null default 'black'::text,
+    "font" text not null default 'sans-serif'::text
+    );
+
+
+
+  create table "public"."tasks" (
+    "id" bigint generated always as identity not null,
+    "title" text not null,
+    "task" text not null,
+    "date" date not null,
+    "done" bool not null default false,
+    "created_at" timestamp with time zone default now()
+    );
