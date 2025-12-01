@@ -1,3 +1,4 @@
+import DeleteEvent from '@/components/delete-event-btn';
 import EventPage from '@/components/event-page';
 import NewHeader from '@/components/new-header';
 import DashboardSidebar from '@/components/ui/DashboardSidebar';
@@ -30,7 +31,7 @@ export default async function Page({ params }: { params: { date: string } }) {
 
   return (
     <div className="min-h-screen flex flex-col bg-white text-black">
-      <NewHeader/>
+      <NewHeader />
       <div className="flex flex-1">
         <DashboardSidebar />
         <main className="flex-1 p-6 overflow-y-auto">
@@ -48,17 +49,20 @@ export default async function Page({ params }: { params: { date: string } }) {
                 events?.map((event) => (
                   <div
                     key={event.id}
-                    className="flex flex-col gap-1 p-2 border-b last:border-b-0"
+                    className="p-4 border rounded-sm flex items-start gap-3 bg-white"
                   >
-                    <h3 className="font-semibold text-lg">
-                      Event: {event.title}
-                    </h3>
-                    <p className="text-gray-600 text-sm whitespace-pre-wrap">
-                      Location: {event.location}
-                    </p>
-                    <p className="text-gray-600 text-sm whitespace-pre-wrap">
-                      Time: {formatTime(event.time)}
-                    </p>
+                    <div className="flex flex-col flex-1">
+                      <h3 className="font-semibold text-lg">
+                        Event: {event.title}
+                      </h3>
+                      <p className="text-gray-600 text-sm whitespace-pre-wrap">
+                        Location: {event.location}
+                      </p>
+                      <p className="text-gray-600 text-sm whitespace-pre-wrap">
+                        Time: {formatTime(event.time)}
+                      </p>
+                    </div>
+                    <DeleteEvent eventId={event.id} />
                   </div>
                 ))
               )}
