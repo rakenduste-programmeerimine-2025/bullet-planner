@@ -1,6 +1,6 @@
 'use client';
 
-import { taskDone } from '@/app/daily-tasks/action';
+import { deleteTask, taskDone } from '@/app/daily-tasks/action';
 import { CheckCircle2, Circle, Trash2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
@@ -25,6 +25,11 @@ export default function TaskItem({ tasks }: TaskItemProps) {
     await taskDone(task.id, setDone);
     router.refresh();
   };
+
+    const handleDelete = async (task:Task) => {
+      await deleteTask(task.id);
+      router.refresh();
+    };
 
   return (
     <div className="space-y-3">
@@ -67,7 +72,7 @@ export default function TaskItem({ tasks }: TaskItemProps) {
             </div>
 
             <button
-              // onClick={() => onDelete(task.id)}
+              onClick={() => handleDelete(task)}
               className="flex-shrink-0 p-2 hover:bg-red-100 rounded-sm transition-colors text-red-600"
             >
               <Trash2 className="w-5 h-5" strokeWidth={2} />
