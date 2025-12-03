@@ -4,13 +4,16 @@ import { useRouter } from 'next/navigation';
 
 export default function NewDatePicker({
   selectedDate,
+  param,
 }: {
+  param:string,
   selectedDate: string;
 }) {
   const router = useRouter();
 
+
   const handleDateChange = (newDate: string) => {
-    router.push(`/dashboard/${newDate}`);
+    router.push(`/${param}/${newDate}`);
   };
   return (
     <div className="mb-6">

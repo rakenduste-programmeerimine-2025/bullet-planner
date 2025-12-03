@@ -27,7 +27,7 @@ export default async function DashboardPage({
   if (!user) {
     redirect('/login');
   }
-  
+
   const { data: events } = await supabase
     .from('events')
     .select()
@@ -55,7 +55,7 @@ export default async function DashboardPage({
           {/* <h1>{date}</h1> */}
           <WelcomeUser />
           <p className="text-gray-600 text-sm">Select date:</p>
-          <NewDatePicker selectedDate={date} />
+          <NewDatePicker selectedDate={date} param="dashboard" />
           <div className="flex flex-1 gap-6">
             {/* Events */}
             <div className="flex-1 flex flex-col border p-4">
