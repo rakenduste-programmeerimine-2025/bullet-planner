@@ -194,33 +194,44 @@ using (
 -- Enable RLS on the database (if not already enabled globally)
 ALTER DATABASE postgres SET row_security = on;
 
---  Create the photos table
-CREATE TABLE public.photos (
+--  Create the photos table (or modify if exists)
+CREATE TABLE IF NOT EXISTS public.photos (
   id uuid DEFAULT gen_random_uuid() PRIMARY KEY,          -- Unique ID
   user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,  -- Linked to Supabase auth user
   url text NOT NULL,                                      -- Image URL
   title text,                                             -- Image title
+  category text DEFAULT NULL,                             -- Image category
   uploaded_at timestamp with time zone DEFAULT now()      -- Upload timestamp
 );
 
 --  Enable RLS on the photos table
 ALTER TABLE public.photos ENABLE ROW LEVEL SECURITY;
 
---  RLS Policies for the photos table (allow authenticated users to manage only their own photos)
+--  RLS Policies for the photos table
+-- Delete existing policies if they exist
+DROP POLICY IF EXISTS "Users can select their photos" ON public.photos;
+DROP POLICY IF EXISTS "Users can insert their photos" ON public.photos;
+DROP POLICY IF EXISTS "Users can update their photos" ON public.photos;
+DROP POLICY IF EXISTS "Users can delete their photos" ON public.photos;
+
 -- Policy for selecting (reading) own photos
-CREATE POLICY "Users can select their photos" ON public.photos
+CREATE POLICY "Users can select their photos" 
+ON public.photos
 FOR SELECT USING (user_id = auth.uid());
 
 -- Policy for inserting (adding) own photos
-CREATE POLICY "Users can insert their photos" ON public.photos
+CREATE POLICY "Users can insert their photos" 
+ON public.photos
 FOR INSERT WITH CHECK (user_id = auth.uid());
 
 -- Policy for updating own photos
-CREATE POLICY "Users can update their photos" ON public.photos
+CREATE POLICY "Users can update their photos" 
+ON public.photos
 FOR UPDATE USING (user_id = auth.uid()) WITH CHECK (user_id = auth.uid());
 
 -- Policy for deleting own photos
-CREATE POLICY "Users can delete their photos" ON public.photos
+CREATE POLICY "Users can delete their photos" 
+ON public.photos
 FOR DELETE USING (user_id = auth.uid());
 
 --  Grant permissions to authenticated users for the photos table
@@ -229,10 +240,11 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON public.photos TO authenticated;
 --  Create the storage bucket for photos (if not done via dashboard)
 INSERT INTO storage.buckets (id, name, public)
 VALUES ('photos', 'photos', true)
-ON CONFLICT (id) DO NOTHING;  -- Avoid errors if it already exists
+ON CONFLICT (id) DO NOTHING;
 
---  Storage Policies for the photos bucket (allow authenticated users to manage files in their own folders)
--- Policy for uploading files to own folder (e.g., userId/file.jpg)
+--  Storage Policies for the photos bucket
+-- Policy for uploading files to own folder (e.g., userId/category/file.jpg)
+DROP POLICY IF EXISTS "Users can upload their own files" ON storage.objects;
 CREATE POLICY "Users can upload their own files" ON storage.objects
 FOR INSERT WITH CHECK (
   bucket_id = 'photos' AND
@@ -241,6 +253,7 @@ FOR INSERT WITH CHECK (
 );
 
 -- Policy for reading (selecting) files from own folder
+DROP POLICY IF EXISTS "Users can read their own files" ON storage.objects;
 CREATE POLICY "Users can read their own files" ON storage.objects
 FOR SELECT USING (
   bucket_id = 'photos' AND
@@ -249,6 +262,7 @@ FOR SELECT USING (
 );
 
 -- Policy for deleting files from own folder
+DROP POLICY IF EXISTS "Users can delete their own files" ON storage.objects;
 CREATE POLICY "Users can delete their own files" ON storage.objects
 FOR DELETE USING (
   bucket_id = 'photos' AND

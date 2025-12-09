@@ -13,20 +13,25 @@ interface Photo {
   user_id: string;
   url: string;
   title: string;
+  category?: string;
   uploaded_at: string;
 }
 
 export default function PhotoGalleryPage() {
   const [photos, setPhotos] = useState<Photo[]>([]);
+  const [categories, setCategories] = useState<string[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const [showAddPhoto, setShowAddPhoto] = useState(false);
-  const [imageUrl, setImageUrl] = useState("");
-  const [imageTitle, setImageTitle] = useState("");
+  const [imageUrl, setImageUrl] = useState<string>("");
+  const [imageTitle, setImageTitle] = useState<string>("");
+  const [imageCategory, setImageCategory] = useState<string>("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [previewUrl, setPreviewUrl] = useState("");
+  const [previewUrl, setPreviewUrl] = useState<string>("");
   const [uploadMethod, setUploadMethod] = useState<"url" | "file">("url");
   const [userId, setUserId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null); // Added for user feedback
+  const [error, setError] = useState<string | null>(null);
+  const [enlargedPhoto, setEnlargedPhoto] = useState<Photo | null>(null);
 
   // Lae kasutaja ja fotod
   useEffect(() => {
@@ -69,7 +74,7 @@ export default function PhotoGalleryPage() {
   }, []);
 
   const fetchPhotos = async (uid: string) => {
-    setError(null); // Clear previous errors
+    setError(null);
     const { data, error } = await supabase
       .from("photos")
       .select("*")
@@ -81,12 +86,16 @@ export default function PhotoGalleryPage() {
       console.error("Fetch photos error:", error);
     } else {
       setPhotos(data || []);
+      const dynamicCategories = Array.from(
+        new Set(["All", ...(data || []).map(p => p.category).filter(Boolean)])
+      );
+      setCategories(dynamicCategories);
     }
   };
 
   const handleAddPhoto = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null); // Clear errors
+    setError(null);
 
     if (!userId) {
       setError("You must be logged in to upload photos.");
@@ -103,7 +112,7 @@ export default function PhotoGalleryPage() {
 
       const fileExt = selectedFile.name.split(".").pop() || "jpg";
       const fileName = `${Date.now()}.${fileExt}`;
-      const filePath = `${userId}/${fileName}`;
+      const filePath = `${userId}/${imageCategory || "Uncategorized"}/${fileName}`;
 
       const { error: uploadError } = await supabase.storage
         .from("photos")
@@ -124,11 +133,14 @@ export default function PhotoGalleryPage() {
       photoUrl = data.publicUrl;
     }
 
-    // Insert only if userId exists
-    console.log("Inserting photo with userId:", userId);
     const { data, error } = await supabase
       .from("photos")
-      .insert({ user_id: userId, url: photoUrl, title: imageTitle || "Untitled" })
+      .insert({
+        user_id: userId,
+        url: photoUrl,
+        title: imageTitle || "Untitled",
+        category: imageCategory || null
+      })
       .select()
       .single();
 
@@ -137,6 +149,9 @@ export default function PhotoGalleryPage() {
       console.error("Insert photo error:", error);
     } else {
       setPhotos([data as Photo, ...photos]);
+      if (data?.category && !categories.includes(data.category)) {
+        setCategories([...categories, data.category]);
+      }
       resetForm();
     }
   };
@@ -165,10 +180,11 @@ export default function PhotoGalleryPage() {
     setShowAddPhoto(false);
     setImageUrl("");
     setImageTitle("");
+    setImageCategory("");
     setSelectedFile(null);
     setPreviewUrl("");
     setUploadMethod("url");
-    setError(null); // Clear errors on reset
+    setError(null);
   };
 
   if (loading) {
@@ -183,6 +199,11 @@ export default function PhotoGalleryPage() {
       </div>
     );
   }
+
+  const filteredPhotos =
+    selectedCategory === "All"
+      ? photos
+      : photos.filter(p => p.category === selectedCategory);
 
   return (
     <div className="flex flex-col min-h-screen bg-white text-black">
@@ -207,6 +228,24 @@ export default function PhotoGalleryPage() {
               </div>
             )}
 
+            {/* Categories */}
+            {categories.length > 1 && (
+              <div className="flex gap-2 mb-4 flex-wrap">
+                {categories.map(cat => (
+                  <button
+                    key={cat}
+                    onClick={() => setSelectedCategory(cat)}
+                    className={`px-3 py-1 rounded-sm font-medium border ${
+                      selectedCategory === cat ? "bg-black text-white" : "border-black/20"
+                    }`}
+                  >
+                    {cat}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {/* Add Photo Form */}
             {!showAddPhoto && (
               <button
                 onClick={() => setShowAddPhoto(true)}
@@ -241,20 +280,22 @@ export default function PhotoGalleryPage() {
                   </label>
                 </div>
 
-                {uploadMethod === "url" ? (
+                {uploadMethod === "url" && (
                   <div className="mb-4">
                     <label htmlFor="image-url" className="block text-sm font-medium mb-2">Image URL</label>
                     <input
                       type="url"
                       id="image-url"
-                      value={imageUrl || ""}
+                      value={imageUrl}
                       onChange={(e) => setImageUrl(e.target.value)}
                       placeholder="https://example.com/image.jpg"
                       className="w-full px-4 py-2 border border-black/20 rounded-sm focus:outline-none focus:border-black"
                       required
                     />
                   </div>
-                ) : (
+                )}
+
+                {uploadMethod === "file" && (
                   <div className="mb-4">
                     <label htmlFor="image-file" className="block text-sm font-medium mb-2">Select Image</label>
                     <input
@@ -278,9 +319,21 @@ export default function PhotoGalleryPage() {
                   <input
                     type="text"
                     id="image-title"
-                    value={imageTitle || ""}
+                    value={imageTitle}
                     onChange={(e) => setImageTitle(e.target.value)}
                     placeholder="Photo title"
+                    className="w-full px-4 py-2 border border-black/20 rounded-sm focus:outline-none focus:border-black"
+                  />
+                </div>
+
+                <div className="mb-4">
+                  <label htmlFor="image-category" className="block text-sm font-medium mb-2">Category (optional)</label>
+                  <input
+                    type="text"
+                    id="image-category"
+                    value={imageCategory}
+                    onChange={(e) => setImageCategory(e.target.value)}
+                    placeholder="e.g. Travel"
                     className="w-full px-4 py-2 border border-black/20 rounded-sm focus:outline-none focus:border-black"
                   />
                 </div>
@@ -292,11 +345,12 @@ export default function PhotoGalleryPage() {
               </form>
             )}
 
-            {photos.length > 0 ? (
+            {/* Photo Grid */}
+            {filteredPhotos.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {photos.map(photo => (
-                  <div key={photo.id} className="border border-black/10 rounded-sm overflow-hidden hover:border-black transition-colors group">
-                    <div className="relative overflow-hidden bg-gray-100 h-64">
+                {filteredPhotos.map(photo => (
+                  <div key={photo.id} className="border border-black/10 rounded-sm overflow-hidden hover:border-black transition-colors group cursor-pointer">
+                    <div className="relative overflow-hidden bg-gray-100 h-64" onClick={() => setEnlargedPhoto(photo)}>
                       <img
                         src={photo.url}
                         alt={photo.title}
@@ -306,6 +360,7 @@ export default function PhotoGalleryPage() {
                     </div>
                     <div className="p-4">
                       <h3 className="font-semibold mb-2 line-clamp-2">{photo.title}</h3>
+                      {photo.category && <p className="text-xs text-gray-500 mb-2">Category: {photo.category}</p>}
                       <p className="text-xs text-gray-500 mb-4">{new Date(photo.uploaded_at).toLocaleDateString()}</p>
                       <button onClick={() => handleDeletePhoto(photo.id)} className="w-full p-2 hover:bg-red-100 rounded-sm transition-colors text-red-600 font-medium text-sm flex items-center justify-center gap-2">
                         <Trash2 className="w-4 h-4" strokeWidth={2} /> Delete
@@ -321,6 +376,14 @@ export default function PhotoGalleryPage() {
                 <button onClick={() => setShowAddPhoto(true)} className="text-black font-semibold hover:underline">Add your first photo</button>
               </div>
             )}
+
+            {/* Enlarged Photo Modal */}
+            {enlargedPhoto && (
+              <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4" onClick={() => setEnlargedPhoto(null)}>
+                <img src={enlargedPhoto.url} alt={enlargedPhoto.title} className="max-h-full max-w-full object-contain" />
+              </div>
+            )}
+
           </div>
         </main>
       </div>
