@@ -1,19 +1,32 @@
 'use client';
 
-import { useState } from "react";
-import { Plus } from "lucide-react";
+import React, { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 
 const supabase = createClient();
 
+interface Photo {
+  id: string;
+  user_id: string;
+  url: string;
+  title: string;
+  category?: string;
+  uploaded_at: string;
+}
+
 interface PhotoUploadFormProps {
-  userId: string;
+  userId: string | null;
   categories: string[];
-  onPhotoAdded: (photo: any) => void;
+  onUpload: (photo: Photo) => void;
   onCancel: () => void;
 }
 
-export default function PhotoUploadForm({ userId, categories, onPhotoAdded, onCancel }: PhotoUploadFormProps) {
+const PhotoUploadForm: React.FC<PhotoUploadFormProps> = ({
+  userId,
+  categories,
+  onUpload,
+  onCancel,
+}) => {
   const [uploadMethod, setUploadMethod] = useState<"url" | "file">("url");
   const [imageUrl, setImageUrl] = useState("");
   const [imageTitle, setImageTitle] = useState("");
@@ -32,12 +45,12 @@ export default function PhotoUploadForm({ userId, categories, onPhotoAdded, onCa
   };
 
   const resetForm = () => {
+    setUploadMethod("url");
     setImageUrl("");
     setImageTitle("");
     setImageCategory("");
     setSelectedFile(null);
     setPreviewUrl("");
-    setUploadMethod("url");
     setError(null);
   };
 
@@ -46,11 +59,11 @@ export default function PhotoUploadForm({ userId, categories, onPhotoAdded, onCa
     setError(null);
 
     if (!userId) {
-      setError("You must be logged in.");
+      setError("You must be logged in to upload photos.");
       return;
     }
 
-    let photoUrl = imageUrl;
+    let finalUrl = imageUrl;
 
     if (uploadMethod === "file") {
       if (!selectedFile) {
@@ -68,7 +81,7 @@ export default function PhotoUploadForm({ userId, categories, onPhotoAdded, onCa
 
       if (uploadError) {
         setError("Upload failed: " + uploadError.message);
-        console.error("Upload error:", uploadError);
+        console.error(uploadError);
         return;
       }
 
@@ -78,27 +91,28 @@ export default function PhotoUploadForm({ userId, categories, onPhotoAdded, onCa
         return;
       }
 
-      photoUrl = data.publicUrl;
+      finalUrl = data.publicUrl;
     }
 
-    const { data, error } = await supabase
+    const { data, error: insertError } = await supabase
       .from("photos")
       .insert({
         user_id: userId,
-        url: photoUrl,
+        url: finalUrl,
         title: imageTitle || "Untitled",
-        category: imageCategory || null
+        category: imageCategory || null,
       })
       .select()
       .single();
 
-    if (error) {
-      setError("Failed to save photo: " + error.message);
-      console.error("Insert photo error:", error);
-    } else {
-      onPhotoAdded(data);
-      resetForm();
+    if (insertError) {
+      setError("Failed to save photo: " + insertError.message);
+      console.error(insertError);
+      return;
     }
+
+    onUpload(data as Photo);
+    resetForm();
   };
 
   return (
@@ -109,7 +123,11 @@ export default function PhotoUploadForm({ userId, categories, onPhotoAdded, onCa
             type="radio"
             value="url"
             checked={uploadMethod === "url"}
-            onChange={() => { setUploadMethod("url"); setPreviewUrl(""); setSelectedFile(null); }}
+            onChange={() => {
+              setUploadMethod("url");
+              setPreviewUrl(imageUrl); // <- preview uuendub ka URL-i meetodil
+              setSelectedFile(null);
+            }}
             className="w-4 h-4 accent-black"
           />
           <span className="font-medium">From URL</span>
@@ -119,7 +137,11 @@ export default function PhotoUploadForm({ userId, categories, onPhotoAdded, onCa
             type="radio"
             value="file"
             checked={uploadMethod === "file"}
-            onChange={() => { setUploadMethod("file"); setImageUrl(""); }}
+            onChange={() => {
+              setUploadMethod("file");
+              setImageUrl("");
+              setPreviewUrl("");
+            }}
             className="w-4 h-4 accent-black"
           />
           <span className="font-medium">Upload File</span>
@@ -133,7 +155,10 @@ export default function PhotoUploadForm({ userId, categories, onPhotoAdded, onCa
             type="url"
             id="image-url"
             value={imageUrl}
-            onChange={(e) => setImageUrl(e.target.value)}
+            onChange={(e) => {
+              setImageUrl(e.target.value);
+              setPreviewUrl(e.target.value); // <- nii preview uuendub kohe
+            }}
             placeholder="https://example.com/image.jpg"
             className="w-full px-4 py-2 border border-black/20 rounded-sm focus:outline-none focus:border-black"
             required
@@ -152,11 +177,12 @@ export default function PhotoUploadForm({ userId, categories, onPhotoAdded, onCa
             className="w-full px-4 py-2 border border-black/20 rounded-sm focus:outline-none focus:border-black"
             required
           />
-          {previewUrl && (
-            <div className="mt-4 rounded-sm overflow-hidden border border-black/10">
-              <img src={previewUrl} alt="Preview" className="max-h-64 w-full object-cover" />
-            </div>
-          )}
+        </div>
+      )}
+
+      {previewUrl && (
+        <div className="mb-4 mt-4 rounded-sm overflow-hidden border border-black/10">
+          <img src={previewUrl} alt="Preview" className="max-h-64 w-full object-cover" />
         </div>
       )}
 
@@ -185,15 +211,19 @@ export default function PhotoUploadForm({ userId, categories, onPhotoAdded, onCa
       </div>
 
       {error && (
-        <div className="mb-4 p-2 bg-red-100 border border-red-400 text-red-700 rounded-sm">
-          {error}
-        </div>
+        <div className="mb-4 p-2 bg-red-100 border border-red-400 text-red-700 rounded-sm">{error}</div>
       )}
 
       <div className="flex gap-2">
-        <button type="submit" className="flex-1 bg-black text-white py-2 rounded-sm font-semibold hover:bg-gray-900 transition-colors">Add Photo</button>
-        <button type="button" onClick={onCancel} className="flex-1 bg-white border-2 border-black text-black py-2 rounded-sm font-semibold hover:bg-gray-50 transition-colors">Cancel</button>
+        <button type="submit" className="flex-1 bg-black text-white py-2 rounded-sm font-semibold hover:bg-gray-900 transition-colors">
+          Add Photo
+        </button>
+        <button type="button" onClick={() => { resetForm(); onCancel(); }} className="flex-1 bg-white border-2 border-black text-black py-2 rounded-sm font-semibold hover:bg-gray-50 transition-colors">
+          Cancel
+        </button>
       </div>
     </form>
   );
-}
+};
+
+export default PhotoUploadForm;
