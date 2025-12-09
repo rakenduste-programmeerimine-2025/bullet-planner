@@ -104,29 +104,79 @@ export default function ProfilePage() {
       <div className="flex flex-1">
         <DashboardSidebar />
         <main className="flex-1 p-6">
-          {message && <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-sm text-green-700">{message}</div>}
-          {error && <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-sm text-red-700 flex gap-3"><AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />{error}</div>}
+          {message && (
+            <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-sm text-green-700">
+              {message}
+            </div>
+          )}
+          {error && (
+            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-sm text-red-700 flex gap-3">
+              <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
+              {error}
+            </div>
+          )}
 
           <div className="max-w-2xl mx-auto space-y-8">
             {/* Profile Card */}
             {!editingProfile ? (
-              <ProfileCard name={profile.name} bio={profile.bio} avatar={profile.avatar} onEdit={() => setEditingProfile(true)} />
+              <ProfileCard
+                name={profile.name}
+                bio={profile.bio}
+                avatar={profile.avatar}
+                onEdit={() => setEditingProfile(true)}
+              />
             ) : (
               <form onSubmit={handleSaveProfile} className="space-y-4 border-2 border-black rounded-sm p-8">
-                <input value={editName} onChange={(e) => setEditName(e.target.value)} placeholder="Name" className="w-full border p-2 rounded-sm" />
-                <textarea value={editBio} onChange={(e) => setEditBio(e.target.value)} placeholder="Bio" className="w-full border p-2 rounded-sm" />
-                <input value={editAvatar} onChange={(e) => setEditAvatar(e.target.value)} placeholder="Avatar URL" className="w-full border p-2 rounded-sm" />
+                <input
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                  placeholder="Name"
+                  className="w-full border p-2 rounded-sm"
+                />
+                <textarea
+                  value={editBio}
+                  onChange={(e) => setEditBio(e.target.value)}
+                  placeholder="Bio"
+                  className="w-full border p-2 rounded-sm"
+                />
+                <input
+                  value={editAvatar}
+                  onChange={(e) => setEditAvatar(e.target.value)}
+                  placeholder="Avatar URL"
+                  className="w-full border p-2 rounded-sm"
+                />
                 <div className="flex gap-2">
-                  <button type="submit" className="bg-black text-white px-4 py-2 rounded-sm">Save</button>
-                  <button type="button" onClick={() => setEditingProfile(false)} className="bg-white border-2 border-black px-4 py-2 rounded-sm">Cancel</button>
+                  <button type="submit" className="bg-black text-white px-4 py-2 rounded-sm">
+                    Save
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setEditingProfile(false)}
+                    className="bg-white border-2 border-black px-4 py-2 rounded-sm"
+                  >
+                    Cancel
+                  </button>
                 </div>
               </form>
             )}
 
             {/* Other components */}
-            <EmailChange userEmail={userEmail} setMessage={setMessage} setError={setError} />
-            <PasswordChange setMessage={setMessage} setError={setError} />
-            <DeleteAccount setMessage={setMessage} setError={setError} />
+            <EmailChange
+              currentEmail={userEmail}
+              setUserEmail={setUserEmail}
+              onSuccessMessage={setMessage}
+              onErrorMessage={setError}
+            />
+
+            <PasswordChange
+              setMessage={setMessage}
+              setError={setError}
+            />
+
+            <DeleteAccount
+              setMessage={setMessage}
+              setError={setError}
+            />
           </div>
         </main>
       </div>
