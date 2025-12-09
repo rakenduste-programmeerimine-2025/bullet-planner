@@ -6,6 +6,7 @@ import { AlertCircle } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import NewHeader from "@/components/new-header";
 import DashboardSidebar from "@/components/ui/DashboardSidebar";
+
 import ProfileCard from "@/components/ui/profile/ProfileCard";
 import EmailChange from "@/components/ui/profile/EmailChange";
 import PasswordChange from "@/components/ui/profile/PasswordChange";
@@ -27,6 +28,7 @@ export default function ProfilePage() {
   const [editName, setEditName] = useState("");
   const [editBio, setEditBio] = useState("");
   const [editAvatar, setEditAvatar] = useState("");
+
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -38,8 +40,10 @@ export default function ProfilePage() {
         router.push("/login");
         return;
       }
+
       setUserEmail(data.user.email);
 
+      // Fetch profile
       const { data: profileData } = await supabase
         .from("profiles")
         .select("*")
@@ -47,7 +51,11 @@ export default function ProfilePage() {
         .single();
 
       if (profileData) {
-        setProfile({ name: profileData.name || "", bio: profileData.bio || "", avatar: profileData.avatar || "" });
+        setProfile({
+          name: profileData.name || "",
+          bio: profileData.bio || "",
+          avatar: profileData.avatar || ""
+        });
         setEditName(profileData.name || "");
         setEditBio(profileData.bio || "");
         setEditAvatar(profileData.avatar || "");
@@ -56,54 +64,38 @@ export default function ProfilePage() {
     fetchUser();
   }, [router, supabase]);
 
+  // Save profile
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(""); setMessage("");
-    if (!editName.trim()) { setError("Name cannot be empty"); return; }
+    setError("");
+    setMessage("");
+
+    if (!editName.trim()) {
+      setError("Name cannot be empty");
+      return;
+    }
 
     setIsLoading(true);
     try {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from("profiles")
-        .upsert({ id: (await supabase.auth.getUser()).data.user?.id, name: editName, bio: editBio, avatar: editAvatar });
+        .upsert({
+          id: (await supabase.auth.getUser()).data.user?.id,
+          name: editName,
+          bio: editBio,
+          avatar: editAvatar
+        });
       if (error) throw error;
+
       setProfile({ name: editName, bio: editBio, avatar: editAvatar });
       setMessage("Profile updated successfully!");
       setEditingProfile(false);
       setTimeout(() => setMessage(""), 3000);
-    } catch (err: any) { setError(err.message || "Error updating profile"); }
-    finally { setIsLoading(false); }
-  };
-
-  const handleEmailChange = async (newEmail: string) => {
-    setError(""); setMessage(""); setIsLoading(true);
-    try {
-      const { error } = await supabase.auth.updateUser({ email: newEmail });
-      if (error) throw error;
-      setUserEmail(newEmail);
-      setMessage("Email updated successfully!");
-    } catch (err: any) { setError(err.message || "Error updating email"); }
-    finally { setIsLoading(false); }
-  };
-
-  const handlePasswordChange = async (newPassword: string) => {
-    setError(""); setMessage(""); setIsLoading(true);
-    try {
-      const { error } = await supabase.auth.updateUser({ password: newPassword });
-      if (error) throw error;
-      setMessage("Password updated successfully!");
-    } catch (err: any) { setError(err.message || "Error updating password"); }
-    finally { setIsLoading(false); }
-  };
-
-  const handleDeleteAccount = async (confirmText: string) => {
-    setError(""); setMessage(""); setIsLoading(true);
-    try {
-      const user = (await supabase.auth.getUser()).data.user;
-      if (user) await supabase.auth.admin.deleteUser(user.id);
-      setTimeout(() => router.push("/"), 500);
-    } catch (err: any) { setError(err.message || "Error deleting account"); }
-    finally { setIsLoading(false); }
+    } catch (err: any) {
+      setError(err.message || "Error updating profile");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -116,6 +108,7 @@ export default function ProfilePage() {
           {error && <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-sm text-red-700 flex gap-3"><AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />{error}</div>}
 
           <div className="max-w-2xl mx-auto space-y-8">
+            {/* Profile Card */}
             {!editingProfile ? (
               <ProfileCard name={profile.name} bio={profile.bio} avatar={profile.avatar} onEdit={() => setEditingProfile(true)} />
             ) : (
@@ -130,9 +123,10 @@ export default function ProfilePage() {
               </form>
             )}
 
-            <EmailChange currentEmail={userEmail || ""} onEmailChange={handleEmailChange} isLoading={isLoading} error={error} setError={setError} />
-            <PasswordChange onPasswordChange={handlePasswordChange} isLoading={isLoading} error={error} setError={setError} />
-            <DeleteAccount onDelete={handleDeleteAccount} isLoading={isLoading} error={error} setError={setError} />
+            {/* Other components */}
+            <EmailChange userEmail={userEmail} setMessage={setMessage} setError={setError} />
+            <PasswordChange setMessage={setMessage} setError={setError} />
+            <DeleteAccount setMessage={setMessage} setError={setError} />
           </div>
         </main>
       </div>
