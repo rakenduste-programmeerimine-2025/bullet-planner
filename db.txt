@@ -188,3 +188,17 @@ using (
         and lists.user_id = auth.uid()
     )
 );
+
+
+
+-- Loo tabel photos
+create table public.photos (
+  id uuid default gen_random_uuid() primary key, -- unikaalne ID
+  user_id uuid not null references auth.users(id) on delete cascade, -- seotud Supabase auth kasutajaga
+  url text not null, -- pildi URL
+  title text, -- pildi pealkiri
+  uploaded_at timestamp with time zone default now() -- üleslaadimise aeg
+);
+
+-- Anna õigused, et autentitud kasutaja saaks lisada, kustutada ja lugeda oma fotosid
+grant select, insert, update, delete on public.photos to authenticated;
