@@ -39,7 +39,7 @@ export default async function DailyTasksPage({
             <h1 className="text-4xl font-bold">Daily Tasks</h1>
           </div>
           <div className="max-w-4xl mx-auto mt-6">
-            <NewDatePicker selectedDate={date} param = "daily-tasks" />
+            <NewDatePicker selectedDate={date} param="daily-tasks" />
             <AddTaskForm date={date} />
             <TaskItem tasks={tasks} />
           </div>
