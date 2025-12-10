@@ -3,17 +3,21 @@
 import { useState } from 'react';
 import { Plus } from 'lucide-react';
 import { createHabit } from '@/app/habits/action';
+import { useRouter } from 'next/navigation';
 
 export default function NewHabitsForm() {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [showForm, setShowForm] = useState(false);
 
+  const router = useRouter()
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     createHabit(name, description);
     setDescription('');
     setName('');
+    router.refresh()
   };
 
   if (!showForm)
