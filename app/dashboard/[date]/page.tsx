@@ -1,4 +1,5 @@
 import NewDatePicker from '@/components/new-datepicker';
+import NewEntryForm from '@/components/new-entry-form';
 import NewHeader from '@/components/new-header';
 import DashboardSidebar from '@/components/ui/DashboardSidebar';
 import WelcomeUser from '@/components/welcome-user';
@@ -56,6 +57,7 @@ export default async function DashboardPage({
           <WelcomeUser />
           <p className="text-gray-600 text-sm">Select date:</p>
           <NewDatePicker selectedDate={date} param="dashboard" />
+          <NewEntryForm date={date}/>
           <div className="flex flex-1 gap-6">
             {/* Events */}
             <div className="flex-1 flex flex-col border p-4">
