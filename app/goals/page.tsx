@@ -1,9 +1,13 @@
 'use client';
 
 import { useState, useEffect } from "react";
-import { Plus, Trash2, Check, Target } from "lucide-react";
+import { Plus, Target } from "lucide-react";
 import NewHeader from "@/components/new-header";
 import DashboardSidebar from "@/components/ui/DashboardSidebar";
+import GoalItem from "@/components/ui/goals/GoalItem";
+import GoalsHeader from "@/components/ui/goals/GoalsHeader";
+import NewGoalForm from "@/components/ui/goals/NewGoalForm";
+import GoalsList from "@/components/ui/goals/GoalsList";
 import { createClient } from "@/lib/supabase/client";
 
 const supabase = createClient();
@@ -11,7 +15,7 @@ const supabase = createClient();
 interface Goal {
   id: string;
   title: string;
-  description: string;
+  description?: string;
   completed: boolean;
   user_id: string;
   created_at: string;
@@ -114,9 +118,8 @@ export default function GoalsPage() {
   const activeGoals = goals.filter(g => !g.completed);
   const completedGoals = goals.filter(g => g.completed);
 
-  const formatDate = (dateStr: string) => {
-    return new Date(dateStr).toLocaleDateString("en-GB", { day: "2-digit", month: "2-digit", year: "numeric" });
-  };
+  const formatDate = (dateStr: string) =>
+    new Date(dateStr).toLocaleDateString("en-GB", { day: "2-digit", month: "2-digit", year: "numeric" });
 
   if (loading) return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
 
@@ -129,15 +132,7 @@ export default function GoalsPage() {
           <div className="max-w-4xl mx-auto p-4 sm:p-8 py-12">
 
             {/* Page Header */}
-            <div className="mb-8">
-              <div className="flex items-center gap-3 mb-2">
-                <Target className="w-8 h-8" strokeWidth={2} />
-                <h1 className="text-4xl font-bold">Goals</h1>
-              </div>
-              <p className="text-gray-600">
-                Track your goals. {completedCount} of {goals.length} completed.
-              </p>
-            </div>
+            <GoalsHeader completedCount={completedCount} totalCount={goals.length} />
 
             {/* New Goal Button / Form */}
             <div className="mb-8">
@@ -150,107 +145,36 @@ export default function GoalsPage() {
                 </button>
               )}
               {showNewGoal && (
-                <form
-                  onSubmit={handleAddGoal}
-                  className="mb-8 p-6 border-2 border-black rounded-sm bg-gray-50"
-                >
-                  <input
-                    type="text"
-                    value={newGoalTitle}
-                    onChange={(e) => setNewGoalTitle(e.target.value)}
-                    placeholder="Goal title"
-                    className="w-full mb-4 px-4 py-2 border border-black/20 rounded-sm focus:outline-none focus:border-black text-lg font-semibold"
-                    autoFocus
-                    required
-                  />
-                  <textarea
-                    value={newGoalDescription}
-                    onChange={(e) => setNewGoalDescription(e.target.value)}
-                    placeholder="Description (optional)"
-                    rows={3}
-                    className="w-full mb-4 px-4 py-2 border border-black/20 rounded-sm focus:outline-none focus:border-black resize-none"
-                  />
-                  <div>
-                    <label htmlFor="due-date" className="block text-sm font-medium mb-2">
-                      Due Date (optional)
-                    </label>
-                    <input
-                      type="date"
-                      id="due-date"
-                      value={newGoalDueDate}
-                      onChange={(e) => setNewGoalDueDate(e.target.value)}
-                      className="w-full mb-4 px-4 py-2 border border-black/20 rounded-sm focus:outline-none focus:border-black"
-                    />
-                  </div>
-                  <div className="flex gap-2">
-                    <button type="submit" className="flex-1 bg-black text-white py-2 rounded-sm font-semibold hover:bg-gray-900 transition-colors">Add Goal</button>
-                    <button
-                      type="button"
-                      onClick={() => setShowNewGoal(false)}
-                      className="flex-1 bg-white border-2 border-black text-black py-2 rounded-sm font-semibold hover:bg-gray-50 transition-colors"
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                </form>
+                <NewGoalForm
+                  title={newGoalTitle}
+                  description={newGoalDescription}
+                  dueDate={newGoalDueDate}
+                  onTitleChange={setNewGoalTitle}
+                  onDescriptionChange={setNewGoalDescription}
+                  onDueDateChange={setNewGoalDueDate}
+                  onAddGoal={handleAddGoal}
+                  onCancel={() => setShowNewGoal(false)}
+                />
               )}
             </div>
 
-            {/* Active Goals */}
-            {activeGoals.length > 0 && (
-              <div className="mb-12">
-                <h2 className="text-2xl font-bold mb-4">Active Goals</h2>
-                <div className="space-y-4">
-                  {activeGoals.map(goal => (
-                    <div key={goal.id} className="p-6 border border-black/10 rounded-sm hover:border-black transition-colors bg-white flex items-start justify-between gap-4">
-                      <div className="flex items-start gap-4 flex-1">
-                        <button onClick={() => handleToggleGoal(goal)} className="mt-1 p-2 hover:bg-gray-100 rounded-sm transition-colors flex-shrink-0">
-                          <div className={`w-6 h-6 border-2 border-black rounded-sm flex items-center justify-center ${goal.completed ? 'bg-black' : ''}`}>
-                            {goal.completed && <Check className="w-4 h-4 text-white" strokeWidth={3} />}
-                          </div>
-                        </button>
-                        <div className="flex-1">
-                          <h3 className={`font-semibold text-lg mb-1 ${goal.completed ? 'line-through text-gray-600' : ''}`}>{goal.title}</h3>
-                          {goal.description && <p className={`text-gray-600 mb-2 ${goal.completed ? 'line-through text-gray-500' : ''}`}>{goal.description}</p>}
-                          {goal.due_date && <p className="text-xs text-gray-500">Due: {formatDate(goal.due_date)}</p>}
-                        </div>
-                      </div>
-                      <button onClick={() => handleDeleteGoal(goal.id)} className="p-2 hover:bg-red-100 rounded-sm transition-colors text-red-600 flex-shrink-0">
-                        <Trash2 className="w-5 h-5" strokeWidth={2} />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+            {/* Active Goals List */}
+            <GoalsList
+              goals={activeGoals}
+              title="Active Goals"
+              onToggle={handleToggleGoal}
+              onDelete={handleDeleteGoal}
+              formatDate={formatDate}
+            />
 
-            {/* Completed Goals */}
-            {completedGoals.length > 0 && (
-              <div className="mb-12">
-                <h2 className="text-2xl font-bold mb-4">Completed Goals</h2>
-                <div className="space-y-4">
-                  {completedGoals.map(goal => (
-                    <div key={goal.id} className="p-6 border border-green-200 rounded-sm bg-green-50 flex items-start justify-between gap-4">
-                      <div className="flex items-start gap-4 flex-1">
-                        <button onClick={() => handleToggleGoal(goal)} className="mt-1 p-2 hover:bg-green-100 rounded-sm transition-colors flex-shrink-0">
-                          <div className="w-6 h-6 bg-green-600 rounded-sm flex items-center justify-center hover:bg-green-700 transition-colors">
-                            <Check className="w-4 h-4 text-white" strokeWidth={3} />
-                          </div>
-                        </button>
-                        <div className="flex-1">
-                          <h3 className="font-semibold text-lg mb-1 line-through text-gray-600">{goal.title}</h3>
-                          {goal.description && <p className="text-gray-600 line-through text-sm mb-2">{goal.description}</p>}
-                          {goal.due_date && <p className="text-xs text-gray-500">Due: {formatDate(goal.due_date)}</p>}
-                        </div>
-                      </div>
-                      <button onClick={() => handleDeleteGoal(goal.id)} className="p-2 hover:bg-red-100 rounded-sm transition-colors text-red-600 flex-shrink-0">
-                        <Trash2 className="w-5 h-5" strokeWidth={2} />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+            {/* Completed Goals List */}
+            <GoalsList
+              goals={completedGoals}
+              title="Completed Goals"
+              onToggle={handleToggleGoal}
+              onDelete={handleDeleteGoal}
+              formatDate={formatDate}
+            />
 
             {/* Empty State */}
             {goals.length === 0 && (
