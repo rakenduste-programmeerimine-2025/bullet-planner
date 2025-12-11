@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from "react";
-import { BookOpen, ListChecks, Calendar, FileText } from "lucide-react";
+import { BookOpen,  ListChecks, Calendar, FileText, CheckCircle, Hourglass } from "lucide-react";
 
 interface Note { id: number; title: string; note: string; date: string; created_at: string; user_id: string; }
 interface Task { id: number; title: string; task: string; date: string; done: boolean; created_at: string; user_id: string; }
@@ -33,9 +33,10 @@ export default function PlannerView({ notes, tasks, events, goals, calendarEntri
 
   const getTypeIcon = (type: string) => {
     switch(type) {
-      case "task": return <ListChecks className="w-4 h-4" />;
-      case "event": return <Calendar className="w-4 h-4" />;
-      default: return <FileText className="w-4 h-4" />;
+      case "task": return <ListChecks className="w-4 h-4 text-black" />;
+      case "event": return <Calendar className="w-4 h-4 text-black" />;
+      case "calendar": return <FileText className="w-4 h-4 text-black" />;
+      default: return <FileText className="w-4 h-4 text-black" />;
     }
   };
 
@@ -43,7 +44,7 @@ export default function PlannerView({ notes, tasks, events, goals, calendarEntri
     <div className="w-full flex flex-col gap-6">
       {/* Header (logo ja pealkiri nagu navis) */}
       <div className="flex items-center gap-2 mb-4">
-        <BookOpen className="w-5 h-5" strokeWidth={2} />
+        <BookOpen className="w-5 h-5 text-black" strokeWidth={2} />
         <span className="text-2xl font-bold">My Planner</span>
       </div>
 
@@ -69,7 +70,7 @@ export default function PlannerView({ notes, tasks, events, goals, calendarEntri
             <p className="text-sm text-gray-500">No notes</p>
           ) : leftEntries.notes.map(note => (
             <div key={note.id} className="p-2 mb-2 border-b flex items-center gap-2">
-              {getTypeIcon("note")}
+              {getTypeIcon("calendar")}
               <span>{note.title}</span>
             </div>
           ))}
@@ -114,9 +115,15 @@ export default function PlannerView({ notes, tasks, events, goals, calendarEntri
         {goals.length === 0 ? (
           <p className="text-sm text-gray-500">No goals</p>
         ) : goals.map(goal => (
-          <div key={goal.id} className="p-2 border-b flex justify-between">
+          <div key={goal.id} className="p-2 border-b flex justify-between items-center">
             <span>{goal.title}</span>
-            <span>{goal.completed ? "✔" : "⏳"}</span>
+            <span>
+              {goal.completed ? (
+                <CheckCircle className="w-4 h-4 text-black" />
+              ) : (
+                <Hourglass className="w-4 h-4 text-black" />
+              )}
+            </span>
           </div>
         ))}
       </div>
