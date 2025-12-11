@@ -9,7 +9,7 @@ import { redirect } from 'next/navigation';
 export default async function DashboardPage({
   params,
 }: {
-  params: { date: string };
+  params: Promise<{ date: string }>;
 }) {
   const { date } = await params;
   const supabase = await createClient();
