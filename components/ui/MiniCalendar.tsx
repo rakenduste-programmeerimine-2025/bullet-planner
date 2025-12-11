@@ -1,5 +1,6 @@
-"use client";
+'use client';
 
+import { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 interface MiniCalendarProps {
@@ -8,9 +9,14 @@ interface MiniCalendarProps {
 }
 
 export default function MiniCalendar({ currentDate, onSelectDate }: MiniCalendarProps) {
+  const [monthDate, setMonthDate] = useState(new Date(currentDate));
+
+  useEffect(() => {
+    setMonthDate(new Date(currentDate));
+  }, [currentDate]);
+
   const daysOfWeek = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
   const today = new Date();
-  const todayStr = today.toISOString().split("T")[0];
 
   const daysInMonth = (date: Date) => new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
 
@@ -20,31 +26,31 @@ export default function MiniCalendar({ currentDate, onSelectDate }: MiniCalendar
   };
 
   const handlePrevMonth = () => {
-    const newDate = new Date(currentDate);
-    newDate.setMonth(currentDate.getMonth() - 1);
-    onSelectDate(newDate);
+    const newDate = new Date(monthDate.getFullYear(), monthDate.getMonth() - 1, 1);
+    setMonthDate(newDate);
   };
 
   const handleNextMonth = () => {
-    const newDate = new Date(currentDate);
-    newDate.setMonth(currentDate.getMonth() + 1);
-    onSelectDate(newDate);
+    const newDate = new Date(monthDate.getFullYear(), monthDate.getMonth() + 1, 1);
+    setMonthDate(newDate);
   };
 
   const renderDays = () => {
-    const totalDays = daysInMonth(currentDate);
-    const firstDay = firstDayOfMonth(currentDate);
+    const totalDays = daysInMonth(monthDate);
+    const firstDay = firstDayOfMonth(monthDate);
     const daysArray: (Date | null)[] = Array(firstDay).fill(null);
 
     for (let i = 1; i <= totalDays; i++) {
-      daysArray.push(new Date(currentDate.getFullYear(), currentDate.getMonth(), i));
+      daysArray.push(new Date(monthDate.getFullYear(), monthDate.getMonth(), i));
     }
 
     return daysArray.map((day, idx) => {
       if (!day) return <div key={idx} className="p-1"></div>;
 
-      const dateStr = day.toISOString().split("T")[0];
-      const isToday = dateStr === todayStr;
+      const isToday =
+        day.getFullYear() === today.getFullYear() &&
+        day.getMonth() === today.getMonth() &&
+        day.getDate() === today.getDate();
 
       return (
         <button
@@ -67,7 +73,7 @@ export default function MiniCalendar({ currentDate, onSelectDate }: MiniCalendar
           <ChevronLeft className="w-4 h-4" />
         </button>
         <span className="text-sm font-semibold">
-          {currentDate.toLocaleDateString("en-US", { month: "long", year: "numeric" })}
+          {monthDate.toLocaleDateString("en-US", { month: "long", year: "numeric" })}
         </span>
         <button onClick={handleNextMonth} className="p-1">
           <ChevronRight className="w-4 h-4" />
