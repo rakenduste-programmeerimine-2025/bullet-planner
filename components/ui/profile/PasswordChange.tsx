@@ -37,8 +37,8 @@ export default function PasswordChange({ setMessage, setError }: PasswordChangeP
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
-    } catch (err: any) {
-      setError(err.message || "Error updating password");
+    } catch {
+      setError( "Error updating password");
     } finally {
       setIsLoading(false);
     }

@@ -5,7 +5,7 @@ import { Mail } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
 interface EmailChangeProps {
-  currentEmail: string | null;
+  currentEmail: string | undefined;
   setUserEmail: (email: string) => void;
   onSuccessMessage: (msg: string) => void;
   onErrorMessage: (msg: string) => void;
@@ -60,8 +60,8 @@ export default function EmailChange({
       onSuccessMessage("Email updated successfully!");
       setIsChangingEmail(false);
 
-    } catch (err: any) {
-      onErrorMessage(err.message || "Error updating email");
+    } catch  {
+      onErrorMessage( "Error updating email");
     } finally {
       setIsLoading(false);
     }

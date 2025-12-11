@@ -1,7 +1,7 @@
 'use client';
 
 import { Trash2 } from "lucide-react";
-import { Item } from "@/types";
+import { Item } from "@/app/lists/page";
 
 interface Props {
   item: Item;

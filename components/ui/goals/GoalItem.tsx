@@ -10,6 +10,7 @@ interface GoalItemProps {
     completed: boolean;
     due_date?: string;
   };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onToggle: (goal: any) => void;
   onDelete: (goalId: string) => void;
   formatDate: (dateStr: string) => string;

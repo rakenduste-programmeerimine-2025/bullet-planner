@@ -4,13 +4,13 @@ import { useState } from "react";
 import { Trash2 } from "lucide-react";
 
 interface DeleteAccountProps {
-  onDelete: (confirmText: string) => void;
+  // onDelete: (confirmText: string) => void;
   isLoading: boolean;
   error: string;
   setError: (msg: string) => void;
 }
 
-export default function DeleteAccount({ onDelete, isLoading, error, setError }: DeleteAccountProps) {
+export default function DeleteAccount({ isLoading,  setError }: DeleteAccountProps) {
   const [showConfirm, setShowConfirm] = useState(false);
   const [confirmText, setConfirmText] = useState("");
 
@@ -20,7 +20,7 @@ export default function DeleteAccount({ onDelete, isLoading, error, setError }: 
       setError('Please type "DELETE" to confirm account deletion');
       return;
     }
-    onDelete(confirmText);
+    // onDelete(confirmText);
   };
 
   return (

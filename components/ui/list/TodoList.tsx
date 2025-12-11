@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { Plus, Trash2 } from "lucide-react";
 import ListItem from "./ListItem";
-import { Item, TodoList as TodoListType } from "@/app/lists/page";
+import { TodoListType } from "@/app/lists/page";
+import { Item } from "@/app/lists/page";
 
 interface TodoListProps {
   list: TodoListType;

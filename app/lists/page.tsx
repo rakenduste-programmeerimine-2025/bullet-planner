@@ -5,7 +5,6 @@ import { Plus, ListChecks } from "lucide-react";
 import NewHeader from "@/components/new-header";
 import DashboardSidebar from "@/components/ui/DashboardSidebar";
 import { createClient } from "@/lib/supabase/client";
-import ListItem from "@/components/ui/list/ListItem";
 import NewListForm from "@/components/ui/list/NewListForm";
 import TodoList from "@/components/ui/list/TodoList";
 
@@ -57,8 +56,7 @@ export default function ListsPage() {
     return () => {
       mounted = false;
       try {
-        (listener as any)?.subscription?.unsubscribe?.();
-        (listener as any)?.unsubscribe?.();
+        listener?.subscription?.unsubscribe?.();
       } catch {}
     };
   }, []);
@@ -121,7 +119,7 @@ export default function ListsPage() {
         return;
       }
 
-      setLists(prev => [...prev, { ...(data as any), items: [] }]);
+      setLists(prev => [...prev, { ...data, items: [] }]);
       setShowNewList(false);
     } catch (err) {
       console.error("handleCreateList unexpected error:", err);
