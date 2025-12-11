@@ -22,7 +22,7 @@ export default function ProfilePage() {
   const router = useRouter();
   const supabase = createClient();
 
-  const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [userEmail, setUserEmail] = useState<string | undefined>();
   const [profile, setProfile] = useState<UserProfile>({ name: "", bio: "", avatar: "" });
   const [editingProfile, setEditingProfile] = useState(false);
   const [editName, setEditName] = useState("");
@@ -77,7 +77,7 @@ export default function ProfilePage() {
 
     setIsLoading(true);
     try {
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from("profiles")
         .upsert({
           id: (await supabase.auth.getUser()).data.user?.id,
@@ -91,12 +91,13 @@ export default function ProfilePage() {
       setMessage("Profile updated successfully!");
       setEditingProfile(false);
       setTimeout(() => setMessage(""), 3000);
-    } catch (err: any) {
-      setError(err.message || "Error updating profile");
+    } catch {
+      setError( "Error updating profile");
     } finally {
       setIsLoading(false);
     }
   };
+//delete function missing
 
   return (
     <div className="min-h-screen flex flex-col bg-white text-black">
@@ -174,8 +175,10 @@ export default function ProfilePage() {
             />
 
             <DeleteAccount
-              setMessage={setMessage}
-              setError={setError}
+              //onDelete = {handleDelete}
+              error = {error}
+              setError ={setError}
+              isLoading = {isLoading}
             />
           </div>
         </main>

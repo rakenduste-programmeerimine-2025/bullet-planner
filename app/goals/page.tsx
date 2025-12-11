@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { Plus, Target } from "lucide-react";
 import NewHeader from "@/components/new-header";
 import DashboardSidebar from "@/components/ui/DashboardSidebar";
-import GoalItem from "@/components/ui/goals/GoalItem";
 import GoalsHeader from "@/components/ui/goals/GoalsHeader";
 import NewGoalForm from "@/components/ui/goals/NewGoalForm";
 import GoalsList from "@/components/ui/goals/GoalsList";
