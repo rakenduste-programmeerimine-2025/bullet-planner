@@ -47,19 +47,19 @@ export default async function name() {
                 <p className="text-gray-600 mb-4">No habits to track</p>
               </div>
             ) : (
-              <div className="flex flex-col gap-6">
+              <div className="flex flex-col gap-6 ">
                 <div className=" flex flex-col overflow-y-auto">
                   <HabitTracker habits={habits} habit_logs={habit_logs} />
                 </div>
-                <div className=" flex flex-col border-2 border-black rounded-sm bg-gray-20 p-4 overflow-y-auto">
-                  <h2 className="text-center font-semibold mb-2">Habit List</h2>
+                <div className=" flex flex-col flex-1 gap-3">
+                  <h2 className="font-semibold mb-2">Habit List</h2>
                   {habits?.map((habit) => (
                     <div
                       key={habit.id}
-                      className="flex justify-between items-center p-2  border-b last:border-b-0"
+                      className="p-4 border rounded-sm flex items-start gap-3 bg-white"
                     >
-                      <div className="flex flex-col">
-                        <span className="font-medium">{habit.name}</span>
+                      <div className="flex flex-col flex-1">
+                        <span className="font-semibold text-lg">{habit.name}</span>
                         <span className="text-gray-600 text-sm">
                           {habit.description}
                         </span>
