@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import DayView, { CalendarEntryType } from "./DayView"; // DayView peab olemas olema
+import { useState, useEffect } from "react";
+import DayView from "./DayView"; // DayView peab olemas olema
 
 interface MonthViewProps {
   selectedDate: Date; // mingi kuu, näiteks 2025-12-01
