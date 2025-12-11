@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import NewHeader from "@/components/new-header";
 import DashboardSidebar from "@/components/ui/DashboardSidebar";
 
@@ -12,7 +11,6 @@ import MonthView from "@/components/ui/calendar/MonthView";
 type ViewMode = "day" | "week" | "month";
 
 export default function CalendarPage() {
-  const router = useRouter();
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [viewMode, setViewMode] = useState<ViewMode>("month");
 
